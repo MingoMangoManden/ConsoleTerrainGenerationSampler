@@ -1,4 +1,5 @@
 - [] Put code in multiple files
+- [] Command-line arguments (width, height, octaves, seed)
 - [] Octaves, persistence, amplitude, stuff like that
 - [] Normal 2d view (not top-down - kind of from the side)
 
