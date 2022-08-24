@@ -2,38 +2,53 @@ package main
 
 import (
 	"fmt"
-	//"math/rand"
-	"time"
-	noise "github.com/ojrac/opensimplex-go"
+	"time" // used to calculate seed for terrain randomization
+	noise "github.com/ojrac/opensimplex-go" // used for calculating terrain height and variation
 )
 
-const (
-	chunks_amount = 256
-	coloumns = 32
 
+const (
+	chunks_amount = 185
+	columns = 56
+	
 	frequency = 0.03
 )
 
 type chunk struct {
-	blocks [coloumns]string
+	blocks [columns]string
 }
 
-func main() {
-	chunks := generate_chunks()
+// IN PLAN
+// checking command-line arguments & settings variables
+/*func init() {
+	args := os.Args
 	
-	for i := 0; i < coloumns; i++ {
-		var coloumn string
-		for j := 0; j < len(chunks); j++ {
-			coloumn += chunks[j].blocks[i]
+	// width
+	if len(args) >= 1 {
+		i, err := strconv.Atoi(args[0])
+		if err != nil {
+			panic(err)
 		}
-		fmt.Println(coloumn)
+		return i
+	}
+	return 100
+}*/
+
+func main() {
+	seed := time.Now().UnixNano()
+	chunks := generate_chunks(seed)
+	
+	for i := 0; i < columns; i++ {
+		var column string
+		for j := 0; j < len(chunks); j++ {
+			column += chunks[j].blocks[i]
+		}
+		fmt.Println(column)
 	}
 }
 
-// seed int32
-func generate_chunks() [chunks_amount]chunk {
+func generate_chunks(seed int64) [chunks_amount]chunk {
 	var chunks [chunks_amount]chunk
-	seed := time.Now().UnixNano()
 	n := noise.New(seed)
 
 	for i := 0; i < chunks_amount; i++ {
@@ -43,15 +58,11 @@ func generate_chunks() [chunks_amount]chunk {
 	return chunks
 }
 
-func randomize_blocks(n noise.Noise, c int) [coloumns]string {
-	var blocks [coloumns] string
+func randomize_blocks(n noise.Noise, c int) [columns]string {
+	var blocks [columns]string
 	
-	//seed := time.Now().UnixNano()
-	//rand.Seed(seed)
-
-	for i := 0; i < coloumns; i++ {
+	for i := 0; i < columns; i++ {
 		height := n.Eval2(float64(c)*frequency, float64(i)*frequency)
-		//fmt.Println(height)
 
 		if height >= 0.5 {
 			blocks[i] = "#"
