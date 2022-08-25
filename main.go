@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	//"math"
 	"time" // used to calculate seed for terrain randomization
 	noise "github.com/ojrac/opensimplex-go" // used for calculating terrain height and variation
 )
@@ -10,8 +11,15 @@ import (
 const (
 	chunks_amount = 185
 	columns = 56
-	
+)
+
+var (
+	// for testing
+	// seed = int64(123)
+	seed = time.Now().UnixNano()
+	octaves = 16 // 16 octaves is the max for a 185x56 world size (after that nothing changes)
 	frequency = 0.03
+	amplitude = 1.0
 )
 
 type chunk struct {
@@ -35,7 +43,6 @@ type chunk struct {
 }*/
 
 func main() {
-	seed := time.Now().UnixNano()
 	chunks := generate_chunks(seed)
 	
 	for i := 0; i < columns; i++ {
@@ -62,7 +69,21 @@ func randomize_blocks(n noise.Noise, c int) [columns]string {
 	var blocks [columns]string
 	
 	for i := 0; i < columns; i++ {
-		height := n.Eval2(float64(c)*frequency, float64(i)*frequency)
+		var height float64
+		
+		// initialize the frequency & amplitude for later change
+		freq := frequency
+		ampl := amplitude
+
+		// loop through each octave
+		for j := 0; j < octaves; j++ {
+			// each higher octave has half the amplitude & double the frequency
+			x := float64(c)*freq
+			y := float64(i)*freq
+			height += float64(n.Eval2(x, y)*ampl)
+			freq *= 2
+			ampl *= 0.5
+		}
 
 		if height >= 0.5 {
 			blocks[i] = "#"
@@ -72,3 +93,33 @@ func randomize_blocks(n noise.Noise, c int) [columns]string {
 	}
 	return blocks
 }
+
+/*func generate_island_height_map() ([][]float64) {
+	//var height_map [chunks_amount][columns]float64
+	height_map := make([][]float64, chunks_amount, columns)
+	size_x := chunks_amount
+	size_y := columns
+
+	// define center
+	center_x := size_x * 0.5
+	center_y := size_y * 0.5
+
+	// generate height map
+	for x := 0; x < size_x; x++ {
+		for y := 0; y < size_y; y++ {
+			// distance = sqrt( (x2 - x1)^2 + (y2 - y1)^2 )
+			distance_x := (center_x - x) * (center_x - x) // x^2
+			distance_y := (center_y - y) * (center_y - y) // y^2
+
+			distance := float64(math.Sqrt(distance_x + distance_y))
+
+			// normalize values
+			distance /= 128.0
+			
+			// define distance
+			height_map[x][y] = distance
+		}
+	}
+
+	return height_map
+}*/
