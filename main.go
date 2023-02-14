@@ -2,23 +2,21 @@ package main
 
 import (
 	"fmt"
-	//"math"
+	"os"
+	"strconv"
 	"time" // used to calculate seed for terrain randomization
 	noise "github.com/ojrac/opensimplex-go" // used for calculating terrain height and variation
 )
 
-
 const (
-	chunks_amount = 185
+	chunks_amount = 150
 	columns = 56
 )
 
 var (
-	// for testing
-	// seed = int64(123)
 	seed = time.Now().UnixNano()
-	octaves = 16 // 16 octaves is the max for a 185x56 world size (after that nothing changes)
-	frequency = 0.03
+	octaves = 1 // 16 octaves is the max for a 185x56 world size (after that nothing changes)
+	frequency float64 // 0.03
 	amplitude = 1.0
 )
 
@@ -26,21 +24,24 @@ type chunk struct {
 	blocks [columns]string
 }
 
-// IN PLAN
-// checking command-line arguments & settings variables
-/*func init() {
-	args := os.Args
-	
+func init() {
+
+	fr, err := strconv.ParseFloat(os.Args[1], 64)
+	if err != nil {
+		panic(err)
+	}
+	frequency = fr
+
 	// width
-	if len(args) >= 1 {
+	/*if len(args) >= 1 {
 		i, err := strconv.Atoi(args[0])
 		if err != nil {
 			panic(err)
 		}
 		return i
 	}
-	return 100
-}*/
+	return 100*/
+}
 
 func main() {
 	chunks := generate_chunks(seed)
